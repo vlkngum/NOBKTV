@@ -2,29 +2,19 @@
 
 Bu proje, NobkTV sohbetinde özel emoji paneli ve otomatik emoji dönüştürme özellikleri ekler.
 
-## Özellikler
-- Sohbet mesajlarında anahtar kelimeleri otomatik olarak emojiye çevirir.
-- Sağ altta açma/kapatma butonu (dex.png ile) ile emoji paneli açılır.
-- Paneldeki emojiye tıklayınca ismi otomatik olarak mesaj kutusuna eklenir ve panel kapanır.
-- Panel açıkken buton renkli, kapalıyken siyah beyaz görünür.
-
 ## Kurulum
 1. Projeyi klonlayın:
    ```sh
    git clone https://github.com/vlkngum/NOBKTV
    ```
-2. Gerekli dosyaları ve görselleri ekleyin.
-3. Tarayıcıda veya eklenti olarak çalıştırın.
-4. Sağ alttaki butona tıklayın, paneli açın ve emoji seçin.
-5. Sohbet kutusuna otomatik olarak emoji ismi eklenir.
-
-Herhangi bir sorunda repodan issue açabilirsiniz.
-
-## Kullanım
-- Sağ alttaki dexter butonuna tıklayarak emoji panelini açın.
-- Paneldeki bir emojiye tıklayınca, ismi otomatik olarak mesaj kutusuna eklenir ve panel kapanır.
-- Sohbet mesajlarında anahtar kelime yazınca otomatik emojiye dönüşür.
+2. Tarayıcıdan eklentilerim bölümünden geliştirici moodunu açın.
+3. Paketlen öğe yükle butonuna tıklayıp klonlanan proje klaösürünü seçin.
+4. Istediğiniz Hyperbeam yayıncısının chatine girin.
+5. Sağ alttaki butona tıklayın, paneli açın ve emoji seçin.
+6. Sohbet kutusuna otomatik olarak emoji ismi eklenir.
 
 ## Geliştirici Notları
 - Panel ve buton stilleri kolayca özelleştirilebilir.
 - Yeni emoji eklemek için `emoji.json` ve `emoji/` klasörünü güncelleyin.
+   
+Herhangi bir sorunda repodan issue açabilirsiniz.

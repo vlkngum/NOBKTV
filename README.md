@@ -11,7 +11,7 @@ Bu proje, NobkTV sohbetinde özel emoji paneli ve otomatik emoji dönüştürme 
 ## Kurulum
 1. Projeyi klonlayın:
    ```sh
-   git clone (https://github.com/vlkngum/NOBKTV
+   git clone https://github.com/vlkngum/NOBKTV
    ```
 2. Gerekli dosyaları ve görselleri ekleyin.
 3. Tarayıcıda veya eklenti olarak çalıştırın.

@@ -1,4 +1,4 @@
-# nobkTV Emoji Panel Extension
+# NobkTV Emoji Panel Extension
 
 Bu proje, nobkTV sohbetinde özel emoji paneli ve otomatik emoji dönüştürme özellikleri ekler.
 

@@ -10,7 +10,7 @@
       const emojiMap = {};
       if (data.emotes && Array.isArray(data.emotes)) {
         data.emotes.forEach(emote => {
-          const name = emote.name; // Orijinal isim (büyük/küçük harf korunuyor)
+          const name = emote.name;
           const id = emote.id;
           emojiMap[name] = `https://cdn.7tv.app/emote/${id}/4x.webp`;
         });
@@ -24,10 +24,46 @@
     }
   }
 
-  const emojiMap = await load7TVEmotes();
+  // Local emoji.json dosyasını yükle
+  async function loadLocalEmojis() {
+    try {
+      const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+        ? chrome.runtime.getURL("emoji.json")
+        : "emoji.json";
+      const res = await fetch(url);
+      const localEmojis = await res.json();
+      
+      // Local emoji URL'lerini düzenle
+      const processedEmojis = {};
+      for (const [key, value] of Object.entries(localEmojis)) {
+        processedEmojis[key] = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+          ? chrome.runtime.getURL(value)
+          : value;
+      }
+      
+      console.log('Local emojis loaded:', Object.keys(processedEmojis).length);
+      return processedEmojis;
+    } catch (error) {
+      console.error('Local emojis yüklenemedi:', error);
+      return {};
+    }
+  }
+
+  // Her iki kaynaktan emoji yükle ve birleştir
+  const [tvEmotes, localEmotes] = await Promise.all([
+    load7TVEmotes(),
+    loadLocalEmojis()
+  ]);
+
+  // 7TV emote'ları öncelikli, sonra local emojiler (çakışma varsa 7TV kazanır)
+  const emojiMap = { ...localEmotes, ...tvEmotes };
+  
+  console.log('Total emojis loaded:', Object.keys(emojiMap).length);
   
   try {
     window.__emojiMap = emojiMap;
+    window.__7tvEmotes = tvEmotes;
+    window.__localEmotes = localEmotes;
     window.__emojiReplacerEnabled = localStorage.getItem('emojiReplacerEnabled') !== 'false';
   } catch (e) {}
 
@@ -93,7 +129,8 @@
   const patterns = Object.keys(emojiMap).map(key => ({
     key,
     regex: new RegExp(`\\b${escapeRegex(key)}\\b`, 'i'),
-    url: emojiMap[key]
+    url: emojiMap[key],
+    source: tvEmotes[key] ? '7tv' : 'local' // Kaynak bilgisi
   }));
   
   console.debug('patterns loaded:', patterns.length);
@@ -167,7 +204,7 @@
     btn.style.cursor = 'pointer';
     btn.style.width = '30px';
     btn.style.height = '30px';
-    // Resim ekle
+    
     const btnImg = document.createElement('img');
     btnImg.src = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
       ? chrome.runtime.getURL('emoji/dex.png')
@@ -178,8 +215,6 @@
     btnImg.style.objectFit = 'contain';
     btnImg.style.display = 'block';
     btn.appendChild(btnImg);
-
-    
 
     const panel = document.createElement('div');
     panel.id = 'emoji-panel';
@@ -226,7 +261,6 @@
     document.body.appendChild(panel);
     document.body.appendChild(btn);
 
-    // Lazy loading için
     let allEmojis = [];
     let currentPage = 0;
     const PAGE_SIZE = 20;
@@ -246,7 +280,7 @@
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
           padding: 12px;
           border-radius: 8px;
           cursor: pointer;
@@ -262,17 +296,18 @@
           width: 64px;
           height: 64px;
           object-fit: contain;
-          flex-shrink: 0;
         `;
         img.title = p.key;
         
         const label = document.createElement('div');
-        label.textContent = p.key; // Orijinal isim gösteriliyor
+        label.textContent = p.key;
         label.style.cssText = `
-          font-size: 14px;
+          font-size: 12px;
           color: #adadb8;
           font-weight: 500;
           word-break: break-word;
+          text-align: center;
+          width: 100%;
         `;
         
         card.addEventListener('click', function() {
@@ -288,7 +323,6 @@
       currentPage++;
       isLoading = false;
 
-      // Eğer daha fazla emoji varsa scroll listener'ı aktif tut
       if (end < allEmojis.length) {
         checkScroll();
       }
@@ -301,26 +335,25 @@
       }
     }
 
-    function populate(filter) {
+    function populate(searchTerm) {
       grid.innerHTML = '';
       currentPage = 0;
       
-      const map = window.__emojiMap || {};
       const patternsLocal = window.__emojiPatterns || [];
       
-      if (filter) {
-        allEmojis = patternsLocal.filter(p => 
-          p.key.toLowerCase().includes(filter.toLowerCase())
+      let filtered = patternsLocal;
+      
+      // Arama terimine göre filtrele
+      if (searchTerm) {
+        filtered = filtered.filter(p => 
+          p.key.toLowerCase().includes(searchTerm.toLowerCase())
         );
-      } else {
-        allEmojis = patternsLocal;
       }
-
-      // İlk batch'i yükle
+      
+      allEmojis = filtered;
       loadMore();
     }
 
-    // Scroll event listener
     panel.addEventListener('scroll', checkScroll);
 
     btn.addEventListener('click', () => {
